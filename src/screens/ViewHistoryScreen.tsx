@@ -3,7 +3,7 @@ import { View, Text, Button } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'ViewHistory'>;
 
 const ViewHistoryScreen: React.FC<Props> = ({ navigation }) => {
   return (
