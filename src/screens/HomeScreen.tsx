@@ -8,8 +8,9 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Your Workout History</Text>
+      {/* <Text style={{fontWeight: 'bold'}}>Your Workout History</Text> */}
       <Button title="Add A Workout" onPress={() => navigation.navigate('AddWorkout')} />
+      <Button title="View History" onPress={() => navigation.navigate('ViewHistory')} />
     </View>
   );
 };
