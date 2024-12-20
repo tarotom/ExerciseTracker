@@ -15,7 +15,7 @@ const AppNavigator = () => (
   <NavigationContainer>
     <Stack.Navigator>
       <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Workout History' }} />
-      <Stack.Screen name="AddWorkout" component={AddWorkoutScreen} options={{ title: 'Add Workout' }} />
+      <Stack.Screen name="AddWorkout" component={AddWorkoutScreen} options={{ title: 'Add A Workout' }} />
     </Stack.Navigator>
   </NavigationContainer>
 );

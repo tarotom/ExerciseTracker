@@ -9,7 +9,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>Your Workout History</Text>
-      <Button title="Add Workout" onPress={() => navigation.navigate('AddWorkout')} />
+      <Button title="Add A Workout" onPress={() => navigation.navigate('AddWorkout')} />
     </View>
   );
 };
