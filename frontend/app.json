@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "ExerciseTracker",
+    "slug": "ExerciseTracker",
+    "scheme": "exercisetracker",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "enabled": false
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "android": {
+      "package": "com.anonymous.ExerciseTracker"
+    }
+  }
+}
