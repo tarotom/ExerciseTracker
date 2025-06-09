@@ -1,30 +1,27 @@
 import { Text, View, StyleSheet, Pressable } from 'react-native';
 import { Link, router } from 'expo-router';
+import { useEffect } from 'react';
 
 export default function Index() {
-  // return (
-  //   <View style={styles.container}>
-  //     <Text style={styles.text}>Home screen</Text>
-  //     <Link href="/home-screen" style={styles.button}>
-  //       Go to About screen
-  //     </Link>
-  //   </View>
-  // );
+  const API_URL = 'http://192.168.1.25:3000';
+
+  // useEffect(() => {
+    fetch('http://192.168.1.25:3000/api/test')
+    .then(async (res) => {
+      const text = await res.text(); // log raw response
+      console.log('Raw response:', text);
+    })
+    .catch((err) => console.error(err));
+  // }, []);
+
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      {/* <Text style={{fontWeight: 'bold'}}>Your Workout History</Text> */}
-      {/* <Button title="Add A Workout" onPress={() => navigation.navigate('AddWorkout')} />
-      <Button title="Add A Exercise" onPress={() => navigation.navigate('AddExercise')} />
-      <Button title="View History" onPress={() => navigation.navigate('ViewHistory')} /> */}
       <Text>Exercise tracker</Text>
-      {/* <Link href="/home-screen" style={styles.button}>
-            Home
-      </Link> */}
-      <Link href="/add-exercise-screen" style={styles.button}>
-            Add exercise
+      <Link href="/create-exercise-screen" style={styles.button}>
+            Create exercise
       </Link>
-      <Link href="/add-workout-screen" style={styles.button}>
-            Add workout
+      <Link href="/create-workout-screen" style={styles.button}>
+            Create workout
       </Link>
       <Link href="/view-exercise-screen" style={styles.button}>
             View exercise
