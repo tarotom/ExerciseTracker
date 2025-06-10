@@ -21,16 +21,18 @@ const CreateExerciseScreen = () => {
       });
 
       const data = await response.json();
-      console.log("data in front = ", data);
+
       if (!response.ok) {
-        console.error('Server error:', data.error); // ⛔ if backend sends an error
+        Alert.alert('Error', data.error || 'Could not add exercise.');
         return;
       }
 
-      console.log('Success:', data.message); // ✅ "Exercise created"
-      } catch (error) {
-        console.error('Network error:', error);
-      }
+      Alert.alert('Success', data.message || 'Exercise added!');
+      setName("");
+    } catch (error) {
+      console.error('Network error:', error);
+      Alert.alert('Network Error', 'Could not connect to the server.');
+    }
   };
 
   return (
