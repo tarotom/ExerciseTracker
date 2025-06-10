@@ -13,13 +13,13 @@ export async function initializeDb() {
     -- 🧩 Workout Templates
     CREATE TABLE IF NOT EXISTS Workouts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL
+      name TEXT UNIQUE NOT NULL
     );
 
     -- 🧩 Exercises (reusable library)
     CREATE TABLE IF NOT EXISTS Exercises (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL
+      name TEXT UNIQUE NOT NULL
     );
 
     -- 🔗 Workout ↔ Exercises (template details)
