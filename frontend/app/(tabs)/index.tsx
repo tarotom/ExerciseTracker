@@ -1,19 +1,7 @@
 import { Text, View, StyleSheet, Pressable } from 'react-native';
-import { Link, router } from 'expo-router';
-import { useEffect } from 'react';
+import { Link } from 'expo-router';
 
 export default function Index() {
-  const API_URL = 'http://192.168.1.25:3000';
-
-  // useEffect(() => {
-    fetch('http://192.168.1.25:3000/api/test')
-    .then(async (res) => {
-      const text = await res.text(); // log raw response
-      console.log('Raw response:', text);
-    })
-    .catch((err) => console.error(err));
-  // }, []);
-
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>Exercise tracker</Text>
