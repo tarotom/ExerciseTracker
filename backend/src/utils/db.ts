@@ -4,8 +4,16 @@ import { open } from 'sqlite';
 let db: any;
 
 export async function initializeDb() {
+  const env = process.env.NODE_ENV;
+  const defaultPath =
+    env === 'test'
+      ? './db/test.sqlite'
+      : env === 'production'
+      ? './db/prod.sqlite'
+      : './db/dev.sqlite';
+
   db = await open({
-    filename: './workout.db',
+    filename: process.env.DATABASE_PATH || defaultPath,
     driver: sqlite3.Database,
   });
 
