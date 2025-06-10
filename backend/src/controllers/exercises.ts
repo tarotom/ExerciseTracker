@@ -15,26 +15,25 @@ export const getExerciseById = async (req: Request, res: Response) => {
 // checking inputs, talking to the DB, sending responses
 export const createExercise = async (req: Request, res: Response): Promise<void> => {
   const { name } = req.body;
-  // console.log("req in back = ", req)
 
   if (!name) {
     res.status(400).json({ error: 'Name is required' });
     return;
   }
 
-  console.log("name in back = ", name);
-
-  db.run(`INSERT INTO Exercises (name) VALUES (?)`, [name], function (err: any) {
-    if (err) {
-      console.error('Insert error:', err);
-      res.status(500).json({ error: 'Failed to create exercise' });
+  try {
+    await db.run(`INSERT INTO Exercises (name) VALUES (?)`, [name]);
+    res.status(201).json({ message: 'Exercise created' });
+  } catch (error: any) {
+    if (error.code === 'SQLITE_CONSTRAINT') {
+      // Duplicate entry (e.g., name already exists - have a UNIQUE constraint on name field)
+      res.status(409).json({ error: 'Exercise already exists' });
       return;
     }
 
-    console.log('Success: inserted row with id');
-    res.status(201).json({ message: 'Exercise created' });
-    return;
-  });
+    console.error('Create exercise error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
 export const updateExercise = async (req: Request, res: Response) => {
