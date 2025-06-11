@@ -3,7 +3,7 @@ import { Tabs } from 'expo-router';
 const TabsLayout = () => {
   return (
     <Tabs>
-        <Tabs.Screen name="index" options={{ title: 'Home' }} />
+        <Tabs.Screen name="home-screen" options={{ title: 'Home' }} />
         <Tabs.Screen name="create-exercise-screen" options={{ title: 'Create Exercise' }} />
         <Tabs.Screen name="create-workout-screen" options={{ title: 'Create Workout' }} />
         <Tabs.Screen name="view-exercise-screen" options={{ title: 'View Exercise' }} />
