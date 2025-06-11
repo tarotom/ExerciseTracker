@@ -1,4 +1,4 @@
-// app/create-exercise.tsx (or wherever your screen is)
+// /app/(tabs)/create-exercise-screen.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 
