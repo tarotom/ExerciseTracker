@@ -30,8 +30,8 @@ async function initializeDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       workoutId INTEGER NOT NULL,
       exerciseId INTEGER NOT NULL,
-      sets INTEGER,
-      targetReps TEXT,
+      sets TEXT,
+      reps TEXT,
       FOREIGN KEY (workoutId) REFERENCES Workouts(id),
       FOREIGN KEY (exerciseId) REFERENCES Exercises(id)
     );
