@@ -12,7 +12,6 @@ export const getExerciseById = async (req: Request, res: Response) => {
 };
 
 // POST /exercise
-// checking inputs, talking to the DB, sending responses
 export const createExercise = async (req: Request, res: Response): Promise<void> => {
   const { name } = req.body;
 
@@ -26,12 +25,11 @@ export const createExercise = async (req: Request, res: Response): Promise<void>
     res.status(201).json({ message: 'Exercise created' });
   } catch (error: any) {
     if (error.code === 'SQLITE_CONSTRAINT') {
-      // Duplicate entry (e.g., name already exists - have a UNIQUE constraint on name field)
       res.status(409).json({ error: 'Exercise already exists' });
       return;
     }
 
-    console.error('Create exercise error:', error);
+    console.error('Create exercise error: ', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
