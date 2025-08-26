@@ -12,7 +12,7 @@ const CreateExerciseScreen = () => {
     }
 
     try {
-      const response = await fetch('http://192.168.1.25:3000/exercises', { // can't use '/api/exercises' because front and back runs on different domains
+      const response = await fetch('http://192.168.1.25:3000/exercises', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 import request from 'supertest';
-import { initializeDb } from '../utils/db'; // Ensure the DB is initialized
-import app from '../app'; // Your Express app
-import db from '../utils/db'; // Your SQLite DB instance
+import { initializeDb } from '../utils/db';
+import app from '../app';
+import db from '../utils/db';
 
 beforeAll(async () => {
     await initializeDb();

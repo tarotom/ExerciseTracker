@@ -20,7 +20,7 @@ interface WorkoutExercise {
   instanceId: number; // unique per workout entry
 }
 
-const BACKEND_URL = 'http://192.168.1.25:3000'; // Replace with your backend IP
+const BACKEND_URL = 'http://192.168.1.25:3000';
 
 const CreateWorkoutScreen = () => {
   const [name, setName] = useState('');
