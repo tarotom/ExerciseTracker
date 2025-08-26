@@ -139,6 +139,9 @@ const TrackWorkoutScreen = () => {
         renderItem={({ item, index: exIdx }) => (
             <View style={styles.exerciseBlock}>
             <Text style={styles.exerciseName}>{item.name}</Text>
+            <Text style={styles.targetText}>
+            Target: {item.sets} sets × {item.reps} reps
+            </Text>
             {item.performedSets.map((set, setIdx) => (
                 <View key={setIdx} style={styles.setRow}>
                 <Text>Set {setIdx + 1}:</Text>
@@ -180,6 +183,7 @@ const styles = StyleSheet.create({
   exerciseName: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
   setRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 4, marginHorizontal: 4, padding: 4, width: 60 },
+  targetText: { fontSize: 14, color: '#666', marginBottom: 4 },
 });
 
 export default TrackWorkoutScreen;
