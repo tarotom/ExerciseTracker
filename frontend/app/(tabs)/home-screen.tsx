@@ -20,6 +20,9 @@ export default function Index() {
       <Link href="/view-workout-screen" style={styles.button}>
             View workout
       </Link>
+      <Link href="/track-workout-screen" style={styles.button}>
+            Track workout
+      </Link>
     </View>
   );
 }

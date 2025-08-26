@@ -9,6 +9,7 @@ const TabsLayout = () => {
         <Tabs.Screen name="view-exercise-screen" options={{ title: 'View Exercise' }} />
         <Tabs.Screen name="view-history-screen" options={{ title: 'View history' }} />
         <Tabs.Screen name="view-workout-screen" options={{ title: 'View workout' }} />
+        <Tabs.Screen name="track-workout-screen" options={{ title: 'Track workout' }} />
     </Tabs>
   );
 }
