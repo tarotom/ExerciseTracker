@@ -1,11 +1,31 @@
 import { Request, Response } from 'express';
 import db from '../utils/db';
 
-export const getAllWorkouts = async (req: Request, res: Response): Promise<void> => {
-  const workouts = await db.all('SELECT * FROM Workouts');
-  res.json(workouts);
+export const getAllWorkouts = async (req: Request, res: Response) => {
+  try {
+    const workouts = await db.all('SELECT * FROM Workouts');
+    const workoutsWithExercises = [];
+    for (const workout of workouts) {
+      const exercises = await db.all(
+        `SELECT we.id, e.name, we.sets, we.reps
+         FROM WorkoutExercises we
+         JOIN Exercises e ON we.exerciseId = e.id
+         WHERE we.workoutId = ?`,
+        [workout.id]
+      );
+      workoutsWithExercises.push({
+        ...workout,
+        exercises,
+      });
+    }
+    res.json(workoutsWithExercises);
+  } catch (err) {
+    console.error('Failed to fetch workouts:', err);
+    res.status(500).json({ error: 'Failed to fetch workouts' });
+  }
 };
 
+// TODO: maybe add the included exercises here too?
 export const getWorkoutById = async (req: Request, res: Response): Promise<void> => {
   const workout = await db.get('SELECT * FROM Workouts WHERE id = ?', req.params.id);
   res.json(workout);
