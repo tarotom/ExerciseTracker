@@ -1,27 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity, Modal, Button } from 'react-native';
 
 const BACKEND_URL = 'http://192.168.1.25:3000';
+
+interface LogExercise {
+  name: string;
+  sets: string;
+  reps: string;
+  weight?: string;
+}
 
 interface WorkoutLog {
   id: number;
   date: string;
   notes?: string;
   workoutName?: string;
+  exercises: LogExercise[];
 }
 
 const ViewHistoryScreen = () => {
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedLog, setSelectedLog] = useState<WorkoutLog | null>(null);
 
   useEffect(() => {
     const fetchLogs = async () => {
       try {
         const res = await fetch(`${BACKEND_URL}/workout-logs`);
         const data = await res.json();
-        setLogs(data);
+        setLogs(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error('Failed to fetch workout history:', err);
+        setLogs([]);
       } finally {
         setLoading(false);
       }
@@ -44,14 +53,39 @@ const ViewHistoryScreen = () => {
         data={logs}
         keyExtractor={item => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.historyContainer}>
+          <TouchableOpacity style={styles.historyContainer} onPress={() => setSelectedLog(item)}>
+            <Text style={styles.workoutName}>{item.workoutName || 'Unnamed Workout'}</Text>
             <Text style={styles.date}>{item.date}</Text>
-            {item.workoutName && <Text style={styles.workoutName}>{item.workoutName}</Text>}
-            {item.notes && <Text style={styles.notes}>{item.notes}</Text>}
-          </View>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={<Text>No workout history found.</Text>}
       />
+
+      {/* Detail Modal */}
+      <Modal visible={!!selectedLog} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {selectedLog && (
+              <>
+                <Text style={styles.title}>{selectedLog.workoutName || 'Unnamed Workout'}</Text>
+                <Text style={styles.date}>{selectedLog.date}</Text>
+                {selectedLog.notes ? <Text style={styles.notes}>{selectedLog.notes}</Text> : null}
+                <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Exercises:</Text>
+                {selectedLog.exercises && selectedLog.exercises.length > 0 ? (
+                  selectedLog.exercises.map((ex, idx) => (
+                    <Text key={idx} style={styles.exerciseText}>
+                      • {ex.name}: {ex.sets} sets × {ex.reps} reps{ex.weight ? ` @ ${ex.weight}` : ''}
+                    </Text>
+                  ))
+                ) : (
+                  <Text>No exercises</Text>
+                )}
+                <Button title="Close" onPress={() => setSelectedLog(null)} />
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -68,9 +102,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   date: { fontWeight: 'bold', fontSize: 16 },
-  workoutName: { fontSize: 15, marginTop: 2 },
+  workoutName: { fontSize: 17, marginBottom: 2 },
   notes: { fontSize: 13, color: '#555', marginTop: 2 },
+  exerciseText: { fontSize: 14, marginLeft: 8 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' },
+  modalContent: { backgroundColor: 'white', padding: 20, borderRadius: 10, width: '90%', maxHeight: '80%' },
 });
 
 export default ViewHistoryScreen;
