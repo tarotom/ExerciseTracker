@@ -38,3 +38,32 @@ export const createWorkoutLog = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to log workout', details: err.message });
   }
 };
+
+// GET /workout-logs
+export const getWorkoutLogs = async (req: Request, res: Response) => {
+  try {
+    // Get all logs with workout name
+    const logs = await db.all(`
+      SELECT wl.id, wl.date, wl.notes, w.name as workoutName
+      FROM WorkoutLogs wl
+      LEFT JOIN Workouts w ON wl.workoutId = w.id
+      ORDER BY wl.date DESC
+    `);
+
+    // For each log, get its exercises
+    for (const log of logs) {
+      log.exercises = await db.all(`
+        SELECT wle.sets, wle.reps, wle.weight, e.name
+        FROM WorkoutLogExercises wle
+        JOIN Exercises e ON wle.exerciseId = e.id
+        WHERE wle.workoutLogId = ?
+        ORDER BY wle.sets ASC
+      `, [log.id]);
+    }
+
+    res.json(logs);
+  } catch (err) {
+    console.error('Failed to fetch workout logs:', err);
+    res.status(500).json({ error: 'Failed to fetch workout logs' });
+  }
+};
