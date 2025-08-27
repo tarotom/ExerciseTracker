@@ -14,11 +14,11 @@ export default function Index() {
       <Link href="/view-exercise-screen" style={styles.button}>
             View exercise
       </Link>
-      <Link href="/view-history-screen" style={styles.button}>
-            View history
-      </Link>
       <Link href="/view-workout-screen" style={styles.button}>
             View workout
+      </Link>
+      <Link href="/view-history-screen" style={styles.button}>
+            View history
       </Link>
       <Link href="/track-workout-screen" style={styles.button}>
             Track workout
