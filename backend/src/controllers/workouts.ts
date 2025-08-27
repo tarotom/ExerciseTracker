@@ -43,6 +43,7 @@ export const createWorkout = async (req: Request, res: Response): Promise<void> 
       'INSERT INTO Workouts (name, description) VALUES (?, ?)',
       [name, description || null]
     );
+    // TODO: should use the workoutExercises controller function here instead
     const workoutId = result.lastID;
     for (const ex of exercises) {
       await db.run(
