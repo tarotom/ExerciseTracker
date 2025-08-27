@@ -6,8 +6,8 @@ const BACKEND_URL = 'http://192.168.1.25:3000';
 interface Exercise {
   id: number;
   name: string;
-  sets: string;
-  reps: string;
+  sets?: string;
+  reps?: string;
 }
 
 interface Workout {
@@ -27,13 +27,101 @@ interface OngoingExercise extends Exercise {
   performedSets: OngoingSet[];
 }
 
+const AddExerciseModal: React.FC<{
+  visible: boolean;
+  onClose: () => void;
+  onAdd: (exercise: Exercise) => void;
+  workoutId: number;
+}> = ({ visible, onClose, onAdd, workoutId }) => {
+  const [allExercises, setAllExercises] = useState<Exercise[]>([]);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [sets, setSets] = useState('');
+  const [reps, setReps] = useState('');
+
+  useEffect(() => {
+    if (visible) {
+      fetch(`${BACKEND_URL}/exercises`)
+        .then(res => res.json())
+        .then(setAllExercises)
+        .catch(() => setAllExercises([]));
+      setSelectedExercise(null);
+      setSets('');
+      setReps('');
+    }
+  }, [visible]);
+
+  const handleConfirm = async () => {
+    if (!selectedExercise || !sets || !reps) return;
+    // Save to WorkoutExercises if unique
+    await fetch(`${BACKEND_URL}/workout-exercises`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        workoutId,
+        exerciseId: selectedExercise.id,
+        sets,
+        reps,
+      }),
+    });
+    onAdd({ ...selectedExercise, sets, reps });
+    onClose();
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.title}>Add Exercise</Text>
+          {!selectedExercise ? (
+            <FlatList
+              data={allExercises}
+              keyExtractor={item => item.id.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.exerciseItem}
+                  onPress={() => setSelectedExercise(item)}
+                >
+                  <Text>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={<Text>No exercises found.</Text>}
+            />
+          ) : (
+            <View>
+              <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>{selectedExercise.name}</Text>
+              <Text>Sets:</Text>
+              <TextInput
+                style={styles.input}
+                value={sets}
+                onChangeText={setSets}
+                placeholder="e.g. 3"
+                keyboardType="numeric"
+              />
+              <Text>Reps:</Text>
+              <TextInput
+                style={styles.input}
+                value={reps}
+                onChangeText={setReps}
+                placeholder="e.g. 10"
+                keyboardType="numeric"
+              />
+              <Button title="Add to Workout" onPress={handleConfirm} disabled={!sets || !reps} />
+              <Button title="Cancel" onPress={() => setSelectedExercise(null)} />
+            </View>
+          )}
+          {!selectedExercise && <Button title="Cancel" onPress={onClose} />}
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 const TrackWorkoutScreen = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [exercises, setExercises] = useState<OngoingExercise[]>([]);
   const [originalExercises, setOriginalExercises] = useState<Exercise[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [allExercises, setAllExercises] = useState<Exercise[]>([]);
 
   // Fetch all workouts
   useEffect(() => {
@@ -48,22 +136,6 @@ const TrackWorkoutScreen = () => {
     };
     fetchWorkouts();
   }, []);
-
-  // Fetch all available exercises for add-exercise modal
-  useEffect(() => {
-    if (showAddModal) {
-      const fetchExercises = async () => {
-        try {
-          const res = await fetch(`${BACKEND_URL}/exercises`);
-          const data = await res.json();
-          setAllExercises(data);
-        } catch (err) {
-          console.error('Failed to fetch exercises:', err);
-        }
-      };
-      fetchExercises();
-    }
-  }, [showAddModal]);
 
   // When a workout is selected, initialize exercises for tracking
   useEffect(() => {
@@ -117,65 +189,50 @@ const TrackWorkoutScreen = () => {
     setExercises(prev => prev.filter((_, i) => i !== exIdx));
   };
 
-  // Add exercise to current workout
-  const handleAddExercise = (exercise: Exercise) => {
-    setExercises(prev => [
-      ...prev,
-      {
-        ...exercise,
-        performedSets: Array.from({ length: Number(exercise.sets) || 1 }, () => ({
-          reps: '',
-          weight: '',
-          completed: false,
-        })),
-      },
-    ]);
-    setShowAddModal(false);
-  };
-
   const handleFinishWorkout = async () => {
-    if (isWorkoutEdited()) {
-        const newName = `${selectedWorkout!.name} (edited) ${new Date().toLocaleString()}`;
-        try {
-        await fetch(`${BACKEND_URL}/workouts`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-            name: newName,
-            description: selectedWorkout!.description || '',
-            exercises: exercises.map(e => ({
-                id: e.id,
-                sets: e.sets,
-                reps: e.reps,
-            })),
-            }),
-        });
-        alert('Workout logged and new template saved!');
-        } catch (err) {
-        alert('Workout logged, but failed to save new template.');
-        }
-    } else {
-        try {
-        const res = await fetch(`${BACKEND_URL}/workout-logs`, {
+    // Log the performed workout
+    try {
+      await fetch(`${BACKEND_URL}/workout-logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            workoutId: selectedWorkout?.id,
-            date: new Date().toISOString(),
-            notes: '', // Optionally add a notes field
-            exercises: exercises.map(e => ({
+          workoutId: selectedWorkout?.id,
+          date: new Date().toISOString(),
+          notes: '', // Optionally add a notes field
+          exercises: exercises.map(e => ({
             id: e.id,
-            performedSets: e.performedSets, // [{ reps, weight, completed }]
-            })),
+            performedSets: e.performedSets,
+          })),
         }),
+      });
+    } catch (err) {
+      alert('Failed to log workout!');
+      return;
+    }
+
+    // Save as new template if edited
+    if (isWorkoutEdited()) {
+      const newName = `${selectedWorkout!.name} (edited) ${new Date().toLocaleString()}`;
+      try {
+        await fetch(`${BACKEND_URL}/workouts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: newName,
+            description: selectedWorkout!.description || '',
+            exercises: exercises.map(e => ({
+              id: e.id,
+              sets: e.sets,
+              reps: e.reps,
+            })),
+          }),
         });
-        if (!res.ok)
-            throw new Error('Failed to log workout');
-        } catch (err) {
-            alert('Failed to log workout!');
-            return;
-        }
-        alert('Workout logged!');
+        alert('Workout logged and new template saved!');
+      } catch (err) {
+        alert('Workout logged, but failed to save new template.');
+      }
+    } else {
+      alert('Workout logged!');
     }
   };
 
@@ -280,30 +337,24 @@ const TrackWorkoutScreen = () => {
       <Button title="Finish Workout" onPress={handleFinishWorkout} />
 
       {/* Add Exercise Modal */}
-      <Modal visible={showAddModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.title}>Add Exercise</Text>
-            <FlatList
-              data={allExercises}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.exerciseItem}
-                  onPress={() => handleAddExercise(item)}
-                >
-                  <Text>{item.name}</Text>
-                  <Text style={{ color: '#888', fontSize: 12 }}>
-                    Target: {item.sets} sets × {item.reps} reps
-                  </Text>
-                </TouchableOpacity>
-              )}
-              ListEmptyComponent={<Text>No exercises found.</Text>}
-            />
-            <Button title="Cancel" onPress={() => setShowAddModal(false)} />
-          </View>
-        </View>
-      </Modal>
+      <AddExerciseModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={exercise => {
+          setExercises(prev => [
+            ...prev,
+            {
+              ...exercise,
+              performedSets: Array.from({ length: Number(exercise.sets) || 1 }, () => ({
+                reps: '',
+                weight: '',
+                completed: false,
+              })),
+            },
+          ]);
+        }}
+        workoutId={selectedWorkout!.id}
+      />
     </View>
   );
 };
