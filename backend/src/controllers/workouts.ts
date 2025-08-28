@@ -7,7 +7,7 @@ export const getAllWorkouts = async (req: Request, res: Response) => {
     const workoutsWithExercises = [];
     for (const workout of workouts) {
       const exercises = await db.all(
-        `SELECT we.id, e.name, we.sets, we.reps
+        `SELECT we.exerciseId as id, e.name, we.sets, we.reps
          FROM WorkoutExercises we
          JOIN Exercises e ON we.exerciseId = e.id
          WHERE we.workoutId = ?`,
@@ -59,10 +59,65 @@ export const createWorkout = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const updateWorkout = async (req: Request, res: Response): Promise<void> => {
-  const { name, description } = req.body;
-  await db.run('UPDATE Workouts SET name = ?, description = ? WHERE id = ?', [name, description, req.params.id]);
-  res.json({ message: 'Workout updated' });
+export const updateWorkout = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { name, description, exercises } = req.body;
+  if (!name || !Array.isArray(exercises) || exercises.length === 0) {
+    res.status(400).json({ error: 'Name and at least one exercise are required' });
+  }
+  try {
+    // Update workout name/description
+    await db.run(
+      'UPDATE Workouts SET name = ?, description = ? WHERE id = ?',
+      [name, description || null, id]
+    );
+
+    // Fetch current exercises for this workout
+    const current = await db.all(
+      'SELECT exerciseId, sets, reps FROM WorkoutExercises WHERE workoutId = ?',
+      [id]
+    );
+
+    // Helper to check if an exercise is already present (by exerciseId, sets, reps)
+    const isPresent = (ex: any) =>
+      current.some(
+        (c: any) =>
+          c.exerciseId === ex.id &&
+          String(c.sets) === String(ex.sets) &&
+          String(c.reps) === String(ex.reps)
+      );
+
+    // Insert only new exercises
+    for (const ex of exercises) {
+      if (!isPresent(ex)) {
+        await db.run(
+          'INSERT INTO WorkoutExercises (workoutId, exerciseId, sets, reps) VALUES (?, ?, ?, ?)',
+          [id, ex.id, ex.sets, ex.reps]
+        );
+      }
+    }
+
+    // Remove exercises that are not in the new list
+    for (const c of current) {
+      if (
+        !exercises.some(
+          (ex: any) =>
+            c.exerciseId === ex.id &&
+            String(c.sets) === String(ex.sets) &&
+            String(c.reps) === String(ex.reps)
+        )
+      ) {
+        await db.run(
+          'DELETE FROM WorkoutExercises WHERE workoutId = ? AND exerciseId = ? AND sets = ? AND reps = ?',
+          [id, c.exerciseId, c.sets, c.reps]
+        );
+      }
+    }
+
+    res.json({ message: 'Workout updated' });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to update workout', details: err.message });
+  }
 };
 
 export const deleteWorkout = async (req: Request, res: Response): Promise<void> => {
