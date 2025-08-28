@@ -35,9 +35,17 @@ export const createExercise = async (req: Request, res: Response): Promise<void>
 };
 
 export const updateExercise = async (req: Request, res: Response) => {
-  const { date, notes } = req.body;
-  await db.run('UPDATE exercises SET date = ?, notes = ? WHERE id = ?', [date, notes, req.params.id]);
-  res.json({ message: 'Exercise updated' });
+  const { id } = req.params;
+  const { name } = req.body;
+  if (!name || !id) {
+    res.status(400).json({ error: 'Name is required' });
+  }
+  try {
+    await db.run('UPDATE Exercises SET name = ? WHERE id = ?', [name, id]);
+    res.json({ message: 'Exercise updated' });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to update exercise', details: err.message });
+  }
 };
 
 export const deleteExercise = async (req: Request, res: Response) => {
