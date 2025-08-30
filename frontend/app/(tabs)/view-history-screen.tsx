@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router/build/exports';
+import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity, Modal, Button } from 'react-native';
 
 const BACKEND_URL = 'http://192.168.1.25:3000';
@@ -23,20 +24,28 @@ const ViewHistoryScreen = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLog, setSelectedLog] = useState<WorkoutLog | null>(null);
 
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const res = await fetch(`${BACKEND_URL}/workout-logs`);
-        const data = await res.json();
-        setLogs(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setLogs([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLogs();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      const fetchLogs = async () => {
+        setLoading(true);
+        try {
+          const res = await fetch(`${BACKEND_URL}/workout-logs`);
+          const data = await res.json();
+          if (isActive)
+            setLogs(Array.isArray(data) ? data : []);
+        } catch (err) {
+          if (isActive)
+            setLogs([]);
+        } finally {
+          if (isActive)
+            setLoading(false);
+        }
+      };
+      fetchLogs();
+      return () => { isActive = false; };
+    }, [])
+  );
 
   if (loading) {
     return (
