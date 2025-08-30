@@ -158,7 +158,7 @@ const ViewWorkoutScreen: React.FC = () => {
         <Text style={styles.sectionTitle}>Exercises:</Text>
         <FlatList
           data={editExercises}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={(_, index) => index.toString()}
           renderItem={({ item, index }) => (
             <View style={styles.exerciseEditRow}>
               <Text style={{ flex: 1 }}>{item.name}</Text>
@@ -252,9 +252,9 @@ const ViewWorkoutScreen: React.FC = () => {
               ) : null}
               <Text style={styles.sectionTitle}>Exercises:</Text>
               {item.exercises && item.exercises.length > 0 ? (
-                item.exercises.map(ex => (
-                  <Text key={ex.id + ex.name} style={styles.exerciseText}>
-                    • {ex.name} ({ex.sets} sets × {ex.reps} reps)
+                item.exercises.map((ex, idx) => (
+                  <Text key={`${ex.id}-${ex.sets}-${ex.reps}-${idx}`} style={styles.exerciseText}>
+                    {ex.name} ({ex.sets} sets × {ex.reps} reps)
                   </Text>
                 ))
               ) : (
