@@ -247,6 +247,7 @@ const TrackWorkoutScreen = () => {
     } else {
       alert('Workout logged!');
     }
+    setSelectedWorkout(null);
     navigation.navigate('home-screen');
   };
 
