@@ -307,7 +307,7 @@ const TrackWorkoutScreen = () => {
       <Button title="Add Exercise" onPress={() => setShowAddModal(true)} />
       <FlatList
         data={exercises}
-        keyExtractor={item => item.id.toString() + item.name}
+        keyExtractor={(_, index) => index.toString()}
         renderItem={({ item, index: exIdx }) => (
           <View style={styles.exerciseBlock}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
