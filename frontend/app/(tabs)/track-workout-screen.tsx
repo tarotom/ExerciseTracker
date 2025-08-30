@@ -253,6 +253,11 @@ const TrackWorkoutScreen = () => {
   };
 
   const handleBack = () => {
+    if (!isWorkoutEdited()) {
+      setSelectedWorkout(null);
+      return;
+    }
+
     Alert.alert(
       'Discard Progress?',
       'Going back will reset any changes you made to this workout. Are you sure?',
@@ -274,6 +279,19 @@ const TrackWorkoutScreen = () => {
         orig.reps !== curr.reps
       ) {
         return true;
+      }
+
+      if (curr.performedSets) {
+        for (let j = 0; j < curr.performedSets.length; j++) {
+          const set = curr.performedSets[j];
+          if (
+            set.reps !== '' ||
+            set.weight !== '' ||
+            set.completed
+          ) {
+            return true;
+          }
+        }
       }
     }
     return false;
