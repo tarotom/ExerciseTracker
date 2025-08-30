@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TextInput, Button, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 const BACKEND_URL = 'http://192.168.1.25:3000';
 
@@ -26,6 +28,16 @@ interface OngoingSet {
 interface OngoingExercise extends Exercise {
   performedSets: OngoingSet[];
 }
+
+type TabParamList = {
+  'home-screen': undefined;
+  'track-workout-screen': undefined;
+  'view-exercise-screen': undefined;
+  'view-workout-screen': undefined;
+  'view-history-screen': undefined;
+  'create-workout-screen': undefined;
+  'create-exercise-screen': undefined;
+};
 
 const AddExerciseModal: React.FC<{
   visible: boolean;
@@ -122,6 +134,7 @@ const TrackWorkoutScreen = () => {
   const [exercises, setExercises] = useState<OngoingExercise[]>([]);
   const [originalExercises, setOriginalExercises] = useState<Exercise[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const navigation = useNavigation<BottomTabNavigationProp<TabParamList>>();
 
   // Fetch all workouts
   useEffect(() => {
@@ -234,6 +247,7 @@ const TrackWorkoutScreen = () => {
     } else {
       alert('Workout logged!');
     }
+    navigation.navigate('home-screen');
   };
 
   const handleBack = () => {
