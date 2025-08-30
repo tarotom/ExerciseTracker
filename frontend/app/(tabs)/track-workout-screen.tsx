@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, TextInput, Button, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 const BACKEND_URL = 'http://192.168.1.25:3000';
@@ -136,19 +136,20 @@ const TrackWorkoutScreen = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const navigation = useNavigation<BottomTabNavigationProp<TabParamList>>();
 
-  // Fetch all workouts
-  useEffect(() => {
-    const fetchWorkouts = async () => {
-      try {
-        const res = await fetch(`${BACKEND_URL}/workouts`);
-        const data = await res.json();
-        setWorkouts(data);
-      } catch (err) {
-        console.error('Failed to fetch workouts:', err);
-      }
-    };
-    fetchWorkouts();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchWorkouts = async () => {
+        try {
+          const res = await fetch(`${BACKEND_URL}/workouts`);
+          const data = await res.json();
+          setWorkouts(data);
+        } catch (err) {
+          console.error('Failed to fetch workouts:', err);
+        }
+      };
+      fetchWorkouts();
+    }, [])
+  );
 
   // When a workout is selected, initialize exercises for tracking
   useEffect(() => {

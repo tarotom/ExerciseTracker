@@ -1,6 +1,6 @@
-import { useFocusEffect } from 'expo-router/build/exports';
 import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity, Modal, Button } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 const BACKEND_URL = 'http://192.168.1.25:3000';
 
