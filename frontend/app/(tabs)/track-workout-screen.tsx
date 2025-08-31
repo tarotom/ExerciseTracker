@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react'
 import { View, Text, FlatList, TextInput, Button, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { showMessage } from "react-native-flash-message";
 
 const BACKEND_URL = 'http://192.168.1.25:3000';
 
@@ -249,13 +250,30 @@ const TrackWorkoutScreen = () => {
             })),
           }),
         });
-        alert('Workout logged and new template saved!');
+        showMessage({
+          message: "Workout logged and new template saved!",
+          type: "success",
+          duration: 2000,
+        });
       } catch (err) {
-        alert('Workout logged, but failed to save new template.');
+        showMessage({
+          message: "Workout logged, but failed to save new template.",
+          type: "danger",
+          duration: 2000,
+        });
       }
     } else {
-      alert('Workout logged!');
+      showMessage({
+        message: "Workout logged!",
+        type: "success",
+        duration: 2000,
+      });
     }
+    showMessage({
+      message: "Workout logged!",
+      type: "success",
+      duration: 2000,
+    });
     setSelectedWorkout(null);
     navigation.navigate('home-screen');
   };
