@@ -64,7 +64,7 @@ const ViewHistoryScreen = () => {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.historyContainer} onPress={() => setSelectedLog(item)}>
             <Text style={styles.workoutName}>{item.workoutName || 'Unnamed Workout'}</Text>
-            <Text style={styles.date}>{item.date}</Text>
+            <Text style={styles.date}>{new Date(item.date).toLocaleString('fi-FI')}</Text>
           </TouchableOpacity>
         )}
         ListEmptyComponent={<Text>No workout history found.</Text>}
@@ -77,7 +77,7 @@ const ViewHistoryScreen = () => {
             {selectedLog && (
               <>
                 <Text style={styles.title}>{selectedLog.workoutName || 'Unnamed Workout'}</Text>
-                <Text style={styles.date}>{selectedLog.date}</Text>
+                <Text style={styles.date}>{new Date(selectedLog.date).toLocaleString('fi-FI')}</Text>
                 {selectedLog.notes ? <Text style={styles.notes}>{selectedLog.notes}</Text> : null}
                 <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Exercises:</Text>
                 {selectedLog.exercises && selectedLog.exercises.length > 0 ? (

@@ -234,7 +234,7 @@ const TrackWorkoutScreen = () => {
 
     // Save as new template if edited
     if (isWorkoutEdited()) {
-      const newName = `${selectedWorkout!.name} (edited) ${new Date().toLocaleString()}`;
+      const newName = `${selectedWorkout!.name} (edited) ${new Date().toLocaleString('fi-FI')}`;
       try {
         await fetch(`${BACKEND_URL}/workouts`, {
           method: 'POST',
