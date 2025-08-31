@@ -10,6 +10,7 @@ import {
   Modal,
 } from 'react-native';
 import ExerciseSelector from '../components/ExerciseSelector';
+import { showMessage } from "react-native-flash-message";
 
 // Extend Exercise type to include sets and reps
 interface WorkoutExercise {
@@ -78,12 +79,21 @@ const CreateWorkoutScreen = () => {
       }
       const data = await res.json();
       console.log('Workout saved:', data);
+      showMessage({
+        message: "Workout saved!",
+        type: "success",
+        duration: 2000,
+      });
       setName('');
       setDescription('');
       setSelectedExercises([]);
     } catch (err) {
-      console.error('Save workout error:', err);
-      alert(err instanceof Error ? err.message : String(err)); // Optional: show error to user
+      console.error('Save workout error: ', err);
+      showMessage({
+        message: "Saving workout failed.",
+        type: "danger",
+        duration: 2000,
+      });
     }
   };
 
