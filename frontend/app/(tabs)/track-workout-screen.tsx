@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
-import { View, Text, FlatList, TextInput, Button, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, Text, FlatList, TextInput, Button, StyleSheet, TouchableOpacity, Alert, Modal, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { showMessage } from "react-native-flash-message";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const BACKEND_URL = 'http://192.168.1.25:3000';
 
@@ -65,7 +66,6 @@ const AddExerciseModal: React.FC<{
 
   const handleConfirm = async () => {
     if (!selectedExercise || !sets || !reps) return;
-    // Save to WorkoutExercises if unique
     await fetch(`${BACKEND_URL}/workout-exercises`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -136,6 +136,7 @@ const TrackWorkoutScreen = () => {
   const [originalExercises, setOriginalExercises] = useState<Exercise[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const navigation = useNavigation<BottomTabNavigationProp<TabParamList>>();
+  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     useCallback(() => {
@@ -221,7 +222,7 @@ const TrackWorkoutScreen = () => {
         body: JSON.stringify({
           workoutId: selectedWorkout?.id,
           date: new Date().toISOString(),
-          notes: '', // Optionally add a notes field
+          notes: '',
           exercises: exercises.map(e => ({
             id: e.id,
             performedSets: e.performedSets,
@@ -229,7 +230,11 @@ const TrackWorkoutScreen = () => {
         }),
       });
     } catch (err) {
-      alert('Failed to log workout!');
+      showMessage({
+        message: "Failed to log workout!",
+        type: "danger",
+        duration: 2000,
+      });
       return;
     }
 
@@ -269,11 +274,6 @@ const TrackWorkoutScreen = () => {
         duration: 2000,
       });
     }
-    showMessage({
-      message: "Workout logged!",
-      type: "success",
-      duration: 2000,
-    });
     setSelectedWorkout(null);
     navigation.navigate('home-screen');
   };
@@ -347,75 +347,91 @@ const TrackWorkoutScreen = () => {
 
   // Step 2: Track workout
   return (
-    <View style={styles.container}>
-      <Button title="Back" onPress={handleBack} />
-      <Text style={styles.title}>Track Workout: {selectedWorkout.name}</Text>
-      <Button title="Add Exercise" onPress={() => setShowAddModal(true)} />
-      <FlatList
-        data={exercises}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item, index: exIdx }) => (
-          <View style={styles.exerciseBlock}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <View>
-                <Text style={styles.exerciseName}>{item.name}</Text>
-                <Text style={styles.targetText}>
-                  Target: {item.sets} sets × {item.reps} reps
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => handleRemoveExercise(exIdx)}>
-                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16 }}>Remove</Text>
-              </TouchableOpacity>
-            </View>
-            {item.performedSets.map((set, setIdx) => (
-              <View key={setIdx} style={styles.setRow}>
-                <Text>Set {setIdx + 1}:</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Reps"
-                  keyboardType="numeric"
-                  value={set.reps}
-                  onChangeText={val => handleSetChange(exIdx, setIdx, 'reps', val)}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Weight"
-                  keyboardType="numeric"
-                  value={set.weight || ''}
-                  onChangeText={val => handleSetChange(exIdx, setIdx, 'weight', val)}
-                />
-                <Button
-                  title={set.completed ? 'Done' : 'Complete'}
-                  onPress={() => handleCompleteSet(exIdx, setIdx)}
-                  color={set.completed ? 'green' : undefined}
-                />
-              </View>
-            ))}
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+      >
+        <View style={{ flex: 1 }}>
+          <View style={styles.container}>
+            <Button title="Back" onPress={handleBack} />
+            <Text style={styles.title}>Track Workout: {selectedWorkout.name}</Text>
+            <Button title="Add Exercise" onPress={() => setShowAddModal(true)} />
+            <FlatList
+              data={exercises}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={({ item, index: exIdx }) => (
+                <View style={styles.exerciseBlock}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View>
+                      <Text style={styles.exerciseName}>{item.name}</Text>
+                      <Text style={styles.targetText}>
+                        Target: {item.sets} sets × {item.reps} reps
+                      </Text>
+                    </View>
+                    <TouchableOpacity onPress={() => handleRemoveExercise(exIdx)}>
+                      <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16 }}>Remove</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {item.performedSets.map((set, setIdx) => (
+                    <View key={setIdx} style={styles.setRow}>
+                      <Text>Set {setIdx + 1}:</Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Reps"
+                        keyboardType="numeric"
+                        value={set.reps}
+                        onChangeText={val => handleSetChange(exIdx, setIdx, 'reps', val)}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Weight"
+                        keyboardType="numeric"
+                        value={set.weight || ''}
+                        onChangeText={val => handleSetChange(exIdx, setIdx, 'weight', val)}
+                      />
+                      <Button
+                        title={set.completed ? 'Done' : 'Complete'}
+                        onPress={() => handleCompleteSet(exIdx, setIdx)}
+                        color={set.completed ? 'green' : undefined}
+                      />
+                    </View>
+                  ))}
+                </View>
+              )}
+            />
+            {/* Add Exercise Modal */}
+            <AddExerciseModal
+              visible={showAddModal}
+              onClose={() => setShowAddModal(false)}
+              onAdd={exercise => {
+                setExercises(prev => [
+                  ...prev,
+                  {
+                    ...exercise,
+                    performedSets: Array.from({ length: Number(exercise.sets) || 1 }, () => ({
+                      reps: '',
+                      weight: '',
+                      completed: false,
+                    })),
+                  },
+                ]);
+              }}
+              workoutId={selectedWorkout!.id}
+            />
           </View>
-        )}
-      />
-      <Button title="Finish Workout" onPress={handleFinishWorkout} />
-
-      {/* Add Exercise Modal */}
-      <AddExerciseModal
-        visible={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAdd={exercise => {
-          setExercises(prev => [
-            ...prev,
-            {
-              ...exercise,
-              performedSets: Array.from({ length: Number(exercise.sets) || 1 }, () => ({
-                reps: '',
-                weight: '',
-                completed: false,
-              })),
-            },
-          ]);
-        }}
-        workoutId={selectedWorkout!.id}
-      />
-    </View>
+        </View>
+        <View style={{
+          padding: 10 + insets.top,
+          backgroundColor: 'white',
+          borderTopWidth: 1,
+          borderColor: '#eee',
+        }}>
+          <Button title="Finish Workout" onPress={handleFinishWorkout} />
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
