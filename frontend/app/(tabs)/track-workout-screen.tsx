@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { View, Text, FlatList, TextInput, Button, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -166,6 +166,14 @@ const TrackWorkoutScreen = () => {
         }))
       );
     }
+  }, [selectedWorkout]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      tabBarStyle: selectedWorkout
+        ? { display: 'none' }
+        : undefined,
+    });
   }, [selectedWorkout]);
 
   const handleSetChange = (exIdx: number, setIdx: number, field: 'reps' | 'weight', value: string) => {
